@@ -1,111 +1,104 @@
 import 'package:flutter/material.dart';
+import 'package:carousel_slider/carousel_slider.dart';
 
-void main() => runApp(MyApp());
+/// 运营位图片列表。
+final List<String> imgList = [
+  "http://y.gtimg.cn/music/common/upload/MUSIC_FOCUS/1201678.jpg",
+  "http://y.gtimg.cn/music/common/upload/MUSIC_FOCUS/1200374.jpg",
+  "http://y.gtimg.cn/music/common/upload/MUSIC_FOCUS/1200375.jpg",
+  "http://y.gtimg.cn/music/common/upload/MUSIC_FOCUS/1201421.jpg",
+  "http://y.gtimg.cn/music/common/upload/MUSIC_FOCUS/1200404.jpg",
+];
 
-class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
-        primarySwatch: Colors.blue,
-      ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
-    );
+/// 用给定的处理函数（`handler`）处理给定的列表数据（`list`），
+/// 返回处理结果列表（`result`）。
+List<T> worker<T>(List list, Function handler) {
+  List<T> result = [];
+  for (var i = 0; i < list.length; i++) {
+    result.add(handler(i, list[i]));
   }
+  return result;
 }
 
-class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
-
+class CarouselWithIndicator extends StatefulWidget {
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  _CarouselWithIndicatorState createState() => _CarouselWithIndicatorState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
-  }
+class _CarouselWithIndicatorState extends State<CarouselWithIndicator> {
+  /// 当前页面的索引。
+  int _current = 0;
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
-    return Scaffold(
-      appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.display1,
-            ),
-          ],
+    return Column(
+      children: <Widget>[
+        // carousel_slider包里的轮播组件（`CarouselSlider`）组件。
+        CarouselSlider(
+          // 使用自定义的工人`agent`方法生成一个容器组件列表。
+          items: worker<Widget>(imgList, (index, i) {
+            return Container(
+              decoration: BoxDecoration(
+                  image: DecorationImage(
+                      // 装饰图片（`DecorationImage`）类的图片（`image`）属性，
+                      // 将图像绘制成装饰。
+                      // 通常通过资产图片（`AssetImage`）使用随应用程序一起提供的图像，
+                      // 或通过网络图像（`NetworkImage`）使用从网络获取的图像。
+                      image: NetworkImage(i),
+                      // 适应属性，如何在框里展示图像。
+                      // https://docs.flutter.io/flutter/painting/BoxFit-class.html
+                      fit: BoxFit.cover)),
+            );
+          }),
+          // 是否自动播放，默认为`false`。
+          autoPlay: false,
+          // 当前页面在视窗中占用的空间，默认为`0.8`。
+          viewportFraction: 1.0,
+          // 宽高比例，默认为`16/9`。
+          aspectRatio: 3 / 2,
+          // 切换时当前页面逐渐变小，新页面逐渐变大直至完全替代当前页面，
+          // 默认为`true`。
+          distortion: true,
+          // 视窗中页面更新时的回调函数。
+          updateCallback: (index) {
+            setState(() {
+              _current = index;
+            });
+          },
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+        // TODO: 第3步：实现“进度条”
+        Row(
+          children: <Widget>[
+            Expanded(
+              flex: 2,
+              child: SizedBox(
+                height: 30.0,
+              ),
+            ),
+            Expanded(
+              flex: 1,
+              child: SizedBox(
+                height: 4.0,
+                child: LinearProgressIndicator(
+                  backgroundColor: const Color(0xFFE1E1E1),
+                  valueColor: AlwaysStoppedAnimation(Color(0xFF414141)),
+                  value: (_current + 1) / imgList.length,
+                ),
+              ),
+            ),
+            Expanded(
+              flex: 2,
+              child: SizedBox(
+                height: 30.0,
+              ),
+            )
+          ],
+        )
+      ],
     );
   }
+}
+
+void main() {
+  runApp(new MaterialApp(title: '轮播', home: new CarouselWithIndicator()));
 }
